@@ -1,0 +1,121 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Bot</title>
+    <style>
+        /* Styles remain the same */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 400px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .chat-box {
+            max-height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+        }
+
+        .bot-message {
+            background-color: #f2f2f2;
+            padding: 8px 12px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .user-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 60px);
+            padding: 10px;
+            border: none;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+        }
+
+        button {
+            width: 60px;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message">
+                <div class="bot-message">Hello! How can I assist you today?</div>
+            </div>
+        </div>
+        <input type="text" id="user-input" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script>
+        function sendMessage() {
+            var userInput = document.getElementById("user-input").value;
+            if (userInput !== "") {
+                appendMessage("user", userInput);
+
+                // Send user message to the backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display response from the backend
+                        var botResponse = data.response;
+                        appendMessage("bot", botResponse);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+                document.getElementById("user-input").value = "";
+            }
+        }
+
+        function appendMessage(sender, message) {
+            var chatBox = document.getElementById("chat-box");
+            var messageDiv = document.createElement("div");
+            messageDiv.className = "chat-message";
+            var messageContent = document.createElement("div");
+            messageContent.className = sender + "-message";
+            messageContent.textContent = message;
+            messageDiv.appendChild(messageContent);
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
